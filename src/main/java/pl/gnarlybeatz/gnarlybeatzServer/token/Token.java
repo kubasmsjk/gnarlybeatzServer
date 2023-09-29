@@ -17,13 +17,14 @@ public class Token {
     @Id
     @GeneratedValue
     private Long id;
+    @Column(unique = true)
     private String token;
     @Enumerated(EnumType.STRING)
-    private TokenType tokenType;
-    private boolean expired;
+    private TokenType tokenType = TokenType.BEARER;
     private boolean revoke;
+    private boolean expired;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 }
