@@ -21,7 +21,7 @@ public class Token {
     private String token;
     @Enumerated(EnumType.STRING)
     private TokenType tokenType = TokenType.BEARER;
-    private boolean revoke;
+    private boolean revoked;
     private boolean expired;
 
     @ManyToOne(fetch = FetchType.LAZY)
