@@ -11,7 +11,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import pl.gnarlybeatz.gnarlybeatzServer.config.JwtService;
-import pl.gnarlybeatz.gnarlybeatzServer.exceptions.ObjectNotValidException;
 import pl.gnarlybeatz.gnarlybeatzServer.exceptions.UserExistException;
 import pl.gnarlybeatz.gnarlybeatzServer.token.Token;
 import pl.gnarlybeatz.gnarlybeatzServer.token.TokenRepository;
@@ -22,7 +21,6 @@ import pl.gnarlybeatz.gnarlybeatzServer.user.UserRepository;
 import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectValidator;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -67,12 +65,14 @@ public class AuthenticationService {
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
+
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
         var jwtToken = jwtService.generateToken(user);
@@ -91,7 +91,7 @@ public class AuthenticationService {
                 .token(jwtToken)
                 .tokenType(TokenType.BEARER)
                 .expired(false)
-                .revoke(false)
+                .revoked(false)
                 .build();
         tokenRepository.save(token);
     }
@@ -102,7 +102,7 @@ public class AuthenticationService {
             return;
         validUserTokens.forEach(t -> {
             t.setExpired(true);
-            t.setRevoke(true);
+            t.setRevoked(true);
         });
         tokenRepository.saveAll(validUserTokens);
     }
