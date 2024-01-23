@@ -2,10 +2,7 @@ package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -28,13 +25,21 @@ public class AudioFilesSearchDao {
             // Handle the case when the request is null
             return null;
         }
+
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<FileData> criteriaQuery = criteriaBuilder.createQuery(FileData.class);
         List<Predicate> predicates = new ArrayList<>();
 
         Root<FileData> root = criteriaQuery.from(FileData.class);
+
+        if (request.getPathname() != null && !request.getPathname().isEmpty() && request.getPathname().equals("profile")) {
+            Join<FileData, FavoriteBeats> favoriteBeatsJoin = root.join("favoriteBeats");
+            Predicate userIdPredicate = criteriaBuilder
+                    .equal(favoriteBeatsJoin.get("user").get("id"), request.getUserId());
+            predicates.add(userIdPredicate);
+        }
+
         if (request.getName() != null && !request.getName().isEmpty()) {
-            System.out.println(request.getName());
             Predicate namePredicate = criteriaBuilder
                     .like(criteriaBuilder.lower(root.get("name")), "%" + request.getName().toLowerCase() + "%");
             predicates.add(namePredicate);
@@ -59,7 +64,8 @@ public class AudioFilesSearchDao {
                     .like(criteriaBuilder.lower(root.get("key")), "%" + request.getKey().toLowerCase() + "%");
             predicates.add(keyPredicate);
         }
-        if(!predicates.isEmpty()) {
+
+        if (!predicates.isEmpty()) {
             criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
         }
         TypedQuery<FileData> query = entityManager.createQuery(criteriaQuery).setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize());
