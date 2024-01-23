@@ -1,13 +1,12 @@
 package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -27,4 +26,7 @@ public class FileData {
     private String audioFiletype;
     private String audioFilePath;
     private String imagePath;
+
+    @OneToMany(mappedBy = "beat", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<FavoriteBeats> favoriteBeats;
 }
