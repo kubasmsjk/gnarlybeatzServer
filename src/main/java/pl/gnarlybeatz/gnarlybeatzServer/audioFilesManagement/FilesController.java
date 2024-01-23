@@ -33,6 +33,23 @@ public class FilesController {
     public ResponseEntity<FilterValues> getFilterValues() {
         return ResponseEntity.ok(filesStorageService.getFilterValues());
     }
+    @CrossOrigin(origins = "*")
+    @PostMapping("/favorite-beats/add")
+    public ResponseEntity<String> addFavoriteBeat(
+            @RequestParam(value = "id") Long userId,
+            @RequestParam(value = "name") String beatName
+    ) {
+        return ResponseEntity.ok(filesStorageService.addFavoriteBeat(userId,beatName));
+    }
+    @CrossOrigin(origins = "*")
+    @PostMapping("/favorite-beats/remove")
+    public ResponseEntity<String> removeFavoriteBeat(
+            @RequestParam(value = "id") Long userId,
+            @RequestParam(value = "name") String beatName
+    ) {
+        return ResponseEntity.ok(filesStorageService.removeFavoriteBeat(userId,beatName));
+    }
+
 //
 //    @CrossOrigin(origins = "*")
 //    @GetMapping("/download/{fileName}")

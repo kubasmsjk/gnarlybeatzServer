@@ -5,15 +5,20 @@ import org.apache.commons.io.FilenameUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import pl.gnarlybeatz.gnarlybeatzServer.exceptions.CreateBlobOfMusicFileException;
+import pl.gnarlybeatz.gnarlybeatzServer.exceptions.FileNotExistException;
 import pl.gnarlybeatz.gnarlybeatzServer.exceptions.FileUploadException;
+import pl.gnarlybeatz.gnarlybeatzServer.user.UserRepository;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -22,6 +27,8 @@ public class FilesStorageService {
 
     private final static String FOLDER_PATH = "D:/inzynierka/gnarlybeatzServer/src/main/java/pl/gnarlybeatz/gnarlybeatzServer/audioFilesManagement/audioFiles/";
     private final FileDataRepository fileDataRepository;
+    private final FavoriteBeatsRepository favoriteBeatsRepository;
+    private final UserRepository userRepository;
     private final AudioFilesSearchDao audioFilesSearchDao;
 
     public String uploadAudioFile(UploadAudioFileRequest request) {
@@ -104,6 +111,30 @@ public class FilesStorageService {
                 .mood(fileDataRepository.findDistinctMood())
                 .genre(fileDataRepository.findDistinctGenre())
                 .build();
+    }
+
+    public String addFavoriteBeat(Long userId, String beatName) {
+        var user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Couldn't find your account."));
+        var fileData = fileDataRepository.findByName(beatName).orElseThrow(() -> new FileNotExistException(Map.of("file", "File not exists")));
+        Optional<FavoriteBeats> beat = favoriteBeatsRepository.findByBeatAndUser(fileData, user);
+        if (beat.isPresent()) {
+            return "File is already in favorites.";
+        } else {
+            var favoriteBeat = FavoriteBeats.builder()
+                    .beat(fileData)
+                    .user(user)
+                    .build();
+            favoriteBeatsRepository.save(favoriteBeat);
+        }
+        return "File has been added.";
+    }
+
+    public String removeFavoriteBeat(Long userId, String beatName) {
+        var user = userRepository.findById(userId).orElseThrow(() -> new UsernameNotFoundException("Couldn't find your account."));
+        var fileData = fileDataRepository.findByName(beatName).orElseThrow(() -> new FileNotExistException(Map.of("file", "File not exists")));
+        Optional<FavoriteBeats> beat = favoriteBeatsRepository.findByBeatAndUser(fileData, user);
+        beat.ifPresent(favoriteBeatsRepository::delete);
+        return "File has been removed.";
     }
 
 //
