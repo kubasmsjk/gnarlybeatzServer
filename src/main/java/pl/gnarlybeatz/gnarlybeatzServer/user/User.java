@@ -5,11 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.FavoriteBeats;
 import pl.gnarlybeatz.gnarlybeatzServer.token.Token;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,20 +26,31 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue
     private Long id;
-
+    @Column(length = 20, nullable = false)
     private String username;
+    @Column(unique = true, nullable = false)
     private String email;
+    @Column(nullable = false)
     private String password;
-
+    private boolean isActive;
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, updatable = false)
     private Role role;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @CreationTimestamp
+    @Column(nullable = false, updatable = false)
+    private Timestamp createdAt;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Token> tokens;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<FavoriteBeats> favoriteBeats;
+
+    public String getName() {
+        return username;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority(role.name()));
+        return role.getAuthorities();
     }
 
     @Override
