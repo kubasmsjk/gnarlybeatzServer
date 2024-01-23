@@ -7,6 +7,6 @@ import java.util.Map;
 @Data
 public class UserExistException extends RuntimeException {
 
-    private final Map<String, Boolean> errorMessages;
+    private final Map<String, String> errorMessages;
 
 }
