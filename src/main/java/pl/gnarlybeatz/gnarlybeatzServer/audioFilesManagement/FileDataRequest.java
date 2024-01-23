@@ -15,4 +15,6 @@ public class FileDataRequest {
     private String mood;
     private String bpm;
     private String key;
+    private String pathname;
+    private Long userId;
 }
