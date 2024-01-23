@@ -7,14 +7,14 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import pl.gnarlybeatz.gnarlybeatzServer.exceptions.ObjectNotValidException;
-import pl.gnarlybeatz.gnarlybeatzServer.exceptions.UserExistException;
+import pl.gnarlybeatz.gnarlybeatzServer.exceptions.*;
+
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ObjectNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<?> handleException(ObjectNotValidException exception) {
 
         return ResponseEntity
@@ -23,28 +23,48 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UserExistException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
     public ResponseEntity<?> handleException(UserExistException exception) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getErrorMessages());
+    }
+
+    @ExceptionHandler(UsernameNotFoundException.class)
+    public ResponseEntity<?> handleException(UsernameNotFoundException exception) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("account", exception.getMessage()));
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<?> handleException(AuthenticationException exception) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("account", "Couldn't find your account."));
+    }
+
+    @ExceptionHandler(TheSamePasswordException.class)
+    public ResponseEntity<?> handleException(TheSamePasswordException exception) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getErrorMessages());
+    }
+
+    @ExceptionHandler(TheSameEmailException.class)
+    public ResponseEntity<?> handleException(TheSameEmailException exception) {
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(exception.getErrorMessages());
+    }
+
+    @ExceptionHandler(FileNotExistException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ResponseEntity<?> handleException(FileNotExistException exception) {
 
         return ResponseEntity
                 .badRequest()
                 .body(exception.getErrorMessages());
     }
 
-    @ExceptionHandler(UsernameNotFoundException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<?> handleException(UsernameNotFoundException exception) {
-
-        return ResponseEntity
-                .badRequest()
-                .body(exception.getMessage());
-    }
-
-    @ExceptionHandler(AuthenticationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<?> handleException(AuthenticationException exception) {
-        return ResponseEntity
-                .badRequest()
-                .body(exception.getMessage());
-    }
 }
