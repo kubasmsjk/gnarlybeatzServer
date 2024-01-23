@@ -22,6 +22,7 @@ import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectValidator;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,17 +33,18 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final ObjectValidator<RegisterRequest> userValidator;
+    private final ObjectValidator<AuthenticateRequest> userValidator;
 
     public AuthenticationResponse register(RegisterRequest request) {
 
-        checkIsUserExist(request.getEmail());
         userValidator.validate(request);
+        ifUserExistsThrowError(request.getEmail());
 
         var user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .isActive(true)
                 .role(Role.USER)
                 .build();
 
@@ -52,19 +54,28 @@ public class AuthenticationService {
         saveUserToken(savedUser, jwtToken);
 
         return AuthenticationResponse.builder()
+                .id(user.getId())
+                .username(request.getUsername())
+                .email(user.getEmail())
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
     }
 
-    private void checkIsUserExist(String email) {
-        var exist = userRepository.findByEmail(email);
-        if (exist.isPresent()) {
-            throw new UserExistException(Map.of("userExistStatus", true));
+    private void ifUserExistsThrowError(String email) {
+        var user = getUserByEmailFromDb(email);
+        if (user.isPresent()) {
+            throw new UserExistException(Map.of("email", "User with this email already exists."));
         }
     }
 
+    private Optional<User> getUserByEmailFromDb(String email) {
+        return userRepository.findByEmail(email);
+    }
+
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+
+        userValidator.validate(request);
 
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -73,13 +84,18 @@ public class AuthenticationService {
                 )
         );
 
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        var user = getUserByEmailFromDb(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("Couldn't find your account."));
+
         var jwtToken = jwtService.generateToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
+
         return AuthenticationResponse.builder()
+                .id(user.getId())
+                .username(user.getName())
+                .email(user.getEmail())
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
