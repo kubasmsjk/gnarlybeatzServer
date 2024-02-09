@@ -1,5 +1,7 @@
 package pl.gnarlybeatz.gnarlybeatzServer.handler;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
