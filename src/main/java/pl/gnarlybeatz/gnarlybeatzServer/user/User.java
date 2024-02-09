@@ -1,21 +1,20 @@
 package pl.gnarlybeatz.gnarlybeatzServer.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.FavoriteBeats;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.favoriteBeats.FavoriteBeats;
+import pl.gnarlybeatz.gnarlybeatzServer.stripe.transaction.TransactionHistory;
 import pl.gnarlybeatz.gnarlybeatzServer.token.Token;
 
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -43,6 +42,8 @@ public class User implements UserDetails {
     private List<Token> tokens;
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FavoriteBeats> favoriteBeats;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<TransactionHistory> transactionHistoryList;
 
     public String getName() {
         return username;
