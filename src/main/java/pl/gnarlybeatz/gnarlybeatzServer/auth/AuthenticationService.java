@@ -15,14 +15,16 @@ import pl.gnarlybeatz.gnarlybeatzServer.exceptions.UserExistException;
 import pl.gnarlybeatz.gnarlybeatzServer.token.Token;
 import pl.gnarlybeatz.gnarlybeatzServer.token.TokenRepository;
 import pl.gnarlybeatz.gnarlybeatzServer.token.TokenType;
-import pl.gnarlybeatz.gnarlybeatzServer.user.Role;
 import pl.gnarlybeatz.gnarlybeatzServer.user.User;
 import pl.gnarlybeatz.gnarlybeatzServer.user.UserRepository;
+import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectRequestInterface;
 import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectValidator;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
+
+import static pl.gnarlybeatz.gnarlybeatzServer.user.Role.USER;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +35,7 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
-    private final ObjectValidator<AuthenticateRequest> userValidator;
+    private final ObjectValidator<ObjectRequestInterface> userValidator;
 
     public AuthenticationResponse register(RegisterRequest request) {
 
@@ -45,7 +47,7 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .isActive(true)
-                .role(Role.USER)
+                .role(USER)
                 .build();
 
         var savedUser = userRepository.save(user);
@@ -57,6 +59,7 @@ public class AuthenticationService {
                 .id(user.getId())
                 .username(request.getUsername())
                 .email(user.getEmail())
+                .role(String.valueOf(user.getRole()))
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -96,6 +99,7 @@ public class AuthenticationService {
                 .id(user.getId())
                 .username(user.getName())
                 .email(user.getEmail())
+                .role(String.valueOf(user.getRole()))
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
                 .build();
@@ -113,7 +117,7 @@ public class AuthenticationService {
     }
 
     private void revokeAllUserTokens(User user) {
-        var validUserTokens = tokenRepository.findAllValidTokensByUser(user.getId());
+        var validUserTokens = tokenRepository.findAllValidTokensByUserId(user.getId());
         if (validUserTokens.isEmpty())
             return;
         validUserTokens.forEach(t -> {
