@@ -13,7 +13,6 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.function.Function;
 
 @Service
@@ -49,7 +48,7 @@ public class JwtService {
     }
 
     public String generateToken(
-            Map<String, Objects> extractClaims,
+            Map<String, Object> extractClaims,
             UserDetails userDetails
     ) {
         return buildToken(extractClaims, userDetails, jwtExpiration);
@@ -58,11 +57,13 @@ public class JwtService {
     public String generateRefreshToken(
             UserDetails userDetails
     ) {
-        return buildToken(new HashMap<>(), userDetails, refreshExpiration);
+        Map<String, Object> extractClaims = new HashMap<>();
+        extractClaims.put("refresh", true);
+        return buildToken(extractClaims, userDetails, refreshExpiration);
     }
 
     private String buildToken(
-            Map<String, Objects> extractClaims,
+            Map<String, Object> extractClaims,
             UserDetails userDetails,
             long expiration
     ) {
