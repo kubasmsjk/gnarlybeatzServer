@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import pl.gnarlybeatz.gnarlybeatzServer.auth.AuthenticateRequest;
+import pl.gnarlybeatz.gnarlybeatzServer.user.edit.EditUserRequest;
+import pl.gnarlybeatz.gnarlybeatzServer.user.edit.EditUserResponse;
+import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectRequestInterface;
 import pl.gnarlybeatz.gnarlybeatzServer.exceptions.TheSameEmailException;
 import pl.gnarlybeatz.gnarlybeatzServer.exceptions.TheSamePasswordException;
 import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectValidator;
@@ -18,7 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final ObjectValidator<AuthenticateRequest> userValidator;
+    private final ObjectValidator<ObjectRequestInterface> userValidator;
 
     public EditUserResponse editUser(EditUserRequest request) {
 
