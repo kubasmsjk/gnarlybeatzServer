@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,7 +12,14 @@ import static pl.gnarlybeatz.gnarlybeatzServer.user.Permission.*;
 
 @RequiredArgsConstructor
 public enum Role {
-    USER(Collections.emptySet()),
+    USER(
+            Set.of(
+                    USER_READ,
+                    USER_UPDATE,
+                    USER_CREATE,
+                    USER_DELETE
+            )
+    ),
     ADMIN(
             Set.of(
                     ADMIN_READ,
@@ -22,18 +27,10 @@ public enum Role {
                     ADMIN_CREATE,
                     ADMIN_DELETE,
 
-                    MANAGER_READ,
-                    MANAGER_UPDATE,
-                    MANAGER_CREATE,
-                    MANAGER_DELETE
-            )
-    ),
-    MANAGER(
-            Set.of(
-                    MANAGER_READ,
-                    MANAGER_UPDATE,
-                    MANAGER_CREATE,
-                    MANAGER_DELETE
+                    USER_READ,
+                    USER_UPDATE,
+                    USER_CREATE,
+                    USER_DELETE
             )
     );
 
