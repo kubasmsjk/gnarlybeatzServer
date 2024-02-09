@@ -1,10 +1,12 @@
-package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
+package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.fileData;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.favoriteBeats.FavoriteBeats;
+import pl.gnarlybeatz.gnarlybeatzServer.stripe.transaction.TransactionHistory;
 
 import java.util.List;
 
@@ -23,10 +25,15 @@ public class FileData {
     private String mood;
     private String bpm;
     private String key;
-    private String audioFiletype;
+    private String audioFileType;
     private String audioFilePath;
     private String imagePath;
+    private String productStripeId;
+    private String productStripePriceId;
+    private boolean isActive;
 
     @OneToMany(mappedBy = "beat", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<FavoriteBeats> favoriteBeats;
+    @OneToMany(mappedBy = "beat", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<TransactionHistory> transactionHistoryList;
 }

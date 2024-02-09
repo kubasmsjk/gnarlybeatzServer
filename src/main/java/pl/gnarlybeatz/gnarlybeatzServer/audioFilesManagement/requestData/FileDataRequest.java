@@ -1,4 +1,4 @@
-package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
+package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.requestData;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

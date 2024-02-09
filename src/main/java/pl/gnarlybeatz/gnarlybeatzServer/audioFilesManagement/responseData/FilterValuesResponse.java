@@ -1,4 +1,4 @@
-package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
+package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.responseData;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +12,7 @@ import java.util.TreeSet;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class FilterValues {
+public class FilterValuesResponse {
     private Set<String> bpm = new TreeSet<>();
     private Set<String> key = new TreeSet<>();
     private Set<String> mood = new TreeSet<>();

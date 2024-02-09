@@ -3,60 +3,85 @@ package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.requestData.FileDataRequest;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.requestData.UploadAudioFileRequest;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.responseData.AudioFileDataResponse;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.responseData.AudioFileUpdateDataResponse;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.responseData.DownloadFileResponse;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.responseData.FilterValuesResponse;
+
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/audio")
 @RequiredArgsConstructor
 public class FilesController {
 
-    private final FilesStorageService filesStorageService;
+    private final FilesService filesService;
 
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadAudioFile(
-            @ModelAttribute UploadAudioFileRequest request
+    @PostMapping("/archiveBeat")
+    public ResponseEntity<String> archiveBeat(
+            @RequestBody FileDataRequest request
     ) {
-        return ResponseEntity.ok(filesStorageService.uploadAudioFile(request));
+        return ResponseEntity.ok(filesService.archiveBeat(request));
     }
 
-    @CrossOrigin(origins = "*")
+    @PostMapping("/uploadOrUpdate")
+    public ResponseEntity<String> uploadOrUpdateAudioFile(
+            @ModelAttribute UploadAudioFileRequest request
+    ) {
+        return ResponseEntity.ok(filesService.uploadOrUpdateAudioFile(request));
+    }
+
+    @GetMapping("/listOfAudioFilesToUpdate")
+    public ResponseEntity<Map<String, AudioFileUpdateDataResponse>> getAllMp3AudioFiles() {
+        return ResponseEntity.ok(filesService.getAllMp3AudioFiles());
+    }
+
+    @GetMapping("/listOfArchiveBeat")
+    public ResponseEntity<Map<String, AudioFileUpdateDataResponse>> getAllMp3ArchiveFiles() {
+        return ResponseEntity.ok(filesService.getAllMp3ArchiveFiles());
+    }
+
     @GetMapping("/search")
     public ResponseEntity<AudioFileDataResponse> filterAndGetSpecificAudioFilesDataOrAll(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "2", required = false) int pageSize,
             FileDataRequest request
     ) {
-        return ResponseEntity.ok(filesStorageService.filterAndGetSpecificAudioFilesDataOrAll(pageNo, pageSize, request));
+        return ResponseEntity.ok(filesService.filterAndGetSpecificAudioFilesDataOrAll(pageNo, pageSize, request));
     }
 
-    @CrossOrigin(origins = "*")
     @GetMapping("/filter/values")
-    public ResponseEntity<FilterValues> getFilterValues() {
-        return ResponseEntity.ok(filesStorageService.getFilterValues());
+    public ResponseEntity<FilterValuesResponse> getFilterValues(
+            @RequestParam(value = "userId", required = false) Long userId,
+            @RequestParam(value = "path") String path
+    ) {
+        return ResponseEntity.ok(filesService.getFilterValues(userId, path));
     }
-    @CrossOrigin(origins = "*")
-    @PostMapping("/favorite-beats/add")
+
+    @PostMapping("/favoriteBeats/add")
     public ResponseEntity<String> addFavoriteBeat(
             @RequestParam(value = "id") Long userId,
             @RequestParam(value = "name") String beatName
     ) {
-        return ResponseEntity.ok(filesStorageService.addFavoriteBeat(userId,beatName));
+        return ResponseEntity.ok(filesService.addFavoriteBeat(userId, beatName));
     }
-    @CrossOrigin(origins = "*")
-    @PostMapping("/favorite-beats/remove")
+
+    @PostMapping("/favoriteBeats/remove")
     public ResponseEntity<String> removeFavoriteBeat(
             @RequestParam(value = "id") Long userId,
             @RequestParam(value = "name") String beatName
     ) {
-        return ResponseEntity.ok(filesStorageService.removeFavoriteBeat(userId,beatName));
+        return ResponseEntity.ok(filesService.removeFavoriteBeat(userId, beatName));
     }
 
-//
-//    @CrossOrigin(origins = "*")
-//    @GetMapping("/download/{fileName}")
-//    public ResponseEntity<byte[]> downloadFile(
-//            @PathVariable String fileName
-//    ) {
-//        return ResponseEntity.ok(filesStorageService.downloadAudioFile(fileName));
-//    }
+    @GetMapping("/download")
+    public ResponseEntity<List<DownloadFileResponse>> downloadFile(
+            @RequestParam(value = "userId") Long userId
+    ) {
+        return ResponseEntity.ok(filesService.downloadAudioFile(userId));
+    }
 
 }
