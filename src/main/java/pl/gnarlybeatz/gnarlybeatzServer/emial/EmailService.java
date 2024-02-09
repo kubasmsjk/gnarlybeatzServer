@@ -2,44 +2,70 @@ package pl.gnarlybeatz.gnarlybeatzServer.emial;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectRequestInterface;
+import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectValidator;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.List;
 
 @Service
-public class EmailService implements EmailSender{
+@RequiredArgsConstructor
+public class EmailService {
 
-    private final static Logger LOGGER = LoggerFactory
-            .getLogger(EmailService.class);
+    private final JavaMailSender mailSender;
+    private final ObjectValidator<ObjectRequestInterface> emailValidator;
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${spring.mail.username}")
+    private String adminEmail;
 
-    @Override
-    @Async
-    public String send(EmailDetails emailDetails) {
-        try{
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
-            helper.setText(emailDetails.getMsgBody(),true);
-            helper.setTo("gnarlybeats444@gmail.com");
-            helper.setSubject(emailDetails.getSubject() + " sent from: " + emailDetails.getSender());
-            mailSender.send(mimeMessage);
-            return "Mail Sent Successfully...";
-        } catch (MessagingException e){
-            LOGGER.error("failed to send email", e);
-            throw new IllegalStateException("failed to send email");
+    public String send(EmailRequest request) {
+        emailValidator.validate(request);
+        try {
+            createContactMeEmailDetails(request);
+            return "Email sent successfully.";
+        } catch (MessagingException e) {
+            return "Email not delivered.";
         }
     }
 
+    @Async
+    protected void createContactMeEmailDetails(EmailRequest emailRequest) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+        helper.setText(emailRequest.getMsgBody(), true);
+        helper.setTo(adminEmail);
+        helper.setSubject(emailRequest.getSubject() + " sent from: " + emailRequest.getSender());
+        mailSender.send(mimeMessage);
+    }
 
-//    String linkToPost = "https://pb.edu.pl/";
-//        for (ForumUser viewer : mainPost.getViewers()) {
-//        emailSender.send(viewer.getEmail(),  "News in: " + mainPost.getTitle(),
-//                EmailTemplate.buildEmail(viewer.getUsername(),linkToPost));
-//    }
+    @Async
+    public void createCheckoutEmailDetails(String receiver, List<File> pdfContent) throws MessagingException {
+        MimeMessage mimeMessage = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+        helper.setTo(receiver);
+        helper.setSubject("License purchase from the Gnarlybeatz website.");
+        helper.setText("Thank you for buying my beat.");
+        pdfContent.forEach(file -> {
+            FileSystemResource fileSystemResource = new FileSystemResource(file);
+            try {
+                helper.addAttachment(file.getName(), fileSystemResource, "application/pdf");
+            } catch (MessagingException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
+        mailSender.send(mimeMessage);
+    }
 }
