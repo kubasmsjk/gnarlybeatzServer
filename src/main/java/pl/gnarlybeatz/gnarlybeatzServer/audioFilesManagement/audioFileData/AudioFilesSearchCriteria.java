@@ -1,4 +1,4 @@
-package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
+package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.audioFileData;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -8,23 +8,22 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.favoriteBeats.FavoriteBeats;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.fileData.FileData;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.requestData.FileDataRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class AudioFilesSearchDao {
+public class AudioFilesSearchCriteria {
     private final EntityManager entityManager;
 
     public Page<FileData> findAllByCriteria(
             FileDataRequest request,
             Pageable pageable
     ) {
-        if (request == null) {
-            // Handle the case when the request is null
-            return null;
-        }
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<FileData> criteriaQuery = criteriaBuilder.createQuery(FileData.class);
@@ -66,8 +65,15 @@ public class AudioFilesSearchDao {
         }
 
         if (!predicates.isEmpty()) {
+            Predicate contentType = criteriaBuilder.equal(root.get("audioFileType"), "audio/mpeg");
+            Predicate isActive = criteriaBuilder.equal(root.get("isActive"), true);
+            predicates.add(contentType);
+            predicates.add(isActive);
             criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
+        } else {
+            criteriaQuery.where(criteriaBuilder.equal(root.get("audioFileType"), "audio/mpeg"), criteriaBuilder.equal(root.get("isActive"), true));
         }
+
         TypedQuery<FileData> query = entityManager.createQuery(criteriaQuery).setFirstResult((int) pageable.getOffset()).setMaxResults(pageable.getPageSize());
         List<FileData> result = query.getResultList();
         return new PageImpl<>(result, pageable, result.size());

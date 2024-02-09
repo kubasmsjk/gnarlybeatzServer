@@ -1,4 +1,4 @@
-package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
+package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.responseData;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,13 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AudioFileData {
-
+public class AudioFileUpdateDataResponse {
     private String name;
     private String genre;
     private String mood;
     private String bpm;
     private String key;
-    private byte[] audioBlob;
-    private byte[] imageBlob;
 }
