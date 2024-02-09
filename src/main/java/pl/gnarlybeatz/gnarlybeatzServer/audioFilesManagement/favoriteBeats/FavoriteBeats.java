@@ -1,10 +1,11 @@
-package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement;
+package pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.favoriteBeats;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import pl.gnarlybeatz.gnarlybeatzServer.audioFilesManagement.fileData.FileData;
 import pl.gnarlybeatz.gnarlybeatzServer.user.User;
 
 @Data
