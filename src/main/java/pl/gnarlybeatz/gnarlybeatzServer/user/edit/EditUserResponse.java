@@ -1,4 +1,4 @@
-package pl.gnarlybeatz.gnarlybeatzServer.user;
+package pl.gnarlybeatz.gnarlybeatzServer.user.edit;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;

@@ -1,20 +1,19 @@
-package pl.gnarlybeatz.gnarlybeatzServer.user;
+package pl.gnarlybeatz.gnarlybeatzServer.user.edit;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pl.gnarlybeatz.gnarlybeatzServer.auth.AuthenticateRequest;
+import pl.gnarlybeatz.gnarlybeatzServer.validator.ObjectRequestInterface;
 
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EditUserRequest implements AuthenticateRequest {
+public class EditUserRequest implements ObjectRequestInterface {
 
     @Size(min = 4, max = 20, message = "The user name must consist of 4 to 20 characters.")
     private String username;
